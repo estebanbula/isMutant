@@ -25,12 +25,14 @@ SECRET_KEY = 'django-insecure-7-5!2enr3e=4m#)wn_o4k!g8id7tbi3^_+6jq5jpye+nolen76
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'ismutant.apps.IsmutantConfig',
+    'stats.apps.StatsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
