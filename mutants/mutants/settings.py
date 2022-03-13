@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import os
+import pymysql
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +28,8 @@ SECRET_KEY = 'django-insecure-7-5!2enr3e=4m#)wn_o4k!g8id7tbi3^_+6jq5jpye+nolen76
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
+STATIC_ROOT = 'static'
 
 
 # Application definition
@@ -33,12 +37,14 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'ismutant.apps.IsmutantConfig',
     'stats.apps.StatsConfig',
+    'home.apps.HomeConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'mutants.urls'
@@ -75,12 +82,28 @@ WSGI_APPLICATION = 'mutants.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+pymysql.install_as_MySQLdb()
+if os.getenv('GAE_APPLICATION', None):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '/cloudsql/is-mutant-mercadolibre:us-central1:mutants',
+            'NAME': 'dna_mutants',
+            'USER': 'root',
+            'PASSWORD': 'mutantes1',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '104.198.42.187',
+            'PORT': '3306',
+            'NAME': 'dna_mutants',
+            'USER': 'root',
+            'PASSWORD': 'mutantes1',
+        }
+    }
 
 
 # Password validation

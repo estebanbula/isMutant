@@ -1,1 +1,4 @@
 Django
+djangorestframework
+django-cors-headers 
+PyMySQL==1.0.2
