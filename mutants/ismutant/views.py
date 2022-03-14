@@ -1,18 +1,19 @@
 from django.utils import timezone
-from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from .models import Dna
-from django.http import HttpResponse, HttpResponseForbidden
+import re
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 
 __sequences = ['AAAA', 'TTTT', 'CCCC', 'GGGG']
 
 @api_view(['POST'])
-def isMutant(request):
-    dna = ["ATGCGA", "CAGTGC", "TTATGT", "AGAAGG", "CCCCTA", "TCACTG"]
+def mutant(request):
     data = JSONParser().parse(request)
     dna = data['dna']
     ocurrences = 0
+    if not validateDna(dna):
+        raise TypeError('Valores incorrectos en cadena de ADN')
     for i in range(len(dna)):
         for j in range(len(dna[i])):
             ocurrences += searchHorizontal(dna, i, j)
@@ -22,10 +23,33 @@ def isMutant(request):
     mutant = ocurrences > 1
     test = Dna(dna_chain=dna, mutant=mutant, analysis_date=timezone.now())
     test.save()
-    if ocurrences > 1:
+    if mutant:
         return HttpResponse()
     else:
         return HttpResponseForbidden()
+
+@api_view(['GET'])
+def stats(request):
+    mutants_count = len(Dna.objects.filter(mutant=True))
+    human_count = len(Dna.objects.filter(mutant=False))
+    ratio = mutants_count / human_count
+    stat = {
+        'count_mutant_dna': mutants_count,
+        'count_human_dna': human_count,
+        'ratio': ratio
+    }
+    return JsonResponse(stat)
+
+def validateDna(dna):
+    values = []
+    for chain in dna:
+        exp = re.findall('[BDEFHIJKLMNOPQRSUVXYZ0-9]', chain)
+        if exp:
+            values.append(exp)
+    if values is None:
+        return True
+    else:
+        return False
 
 def searchHorizontal(dna, i, j):
     matches = 0
@@ -63,6 +87,3 @@ def searchDiagonalInv(dna, i, j):
             if seq == data:
                 matches += 1
     return matches
-
-class DnaView(viewsets.ModelViewSet):
-    queryset = Dna.objects.all()

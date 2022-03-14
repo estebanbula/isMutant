@@ -6,7 +6,7 @@ class Dna(models.Model):
     analysis_date = models.DateTimeField()
 
     def __str__(self):
-        return self.dna
+        return self.dna_chain
 
     def analysis_day(self):
         return self.analysis_date
