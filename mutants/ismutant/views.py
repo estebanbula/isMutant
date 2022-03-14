@@ -12,8 +12,7 @@ def mutant(request):
     data = JSONParser().parse(request)
     dna = data['dna']
     ocurrences = 0
-    if not validateDna(dna):
-        raise TypeError('Valores incorrectos en cadena de ADN')
+    goodDna(dna)
     for i in range(len(dna)):
         for j in range(len(dna[i])):
             ocurrences += searchHorizontal(dna, i, j)
@@ -36,20 +35,16 @@ def stats(request):
     stat = {
         'count_mutant_dna': mutants_count,
         'count_human_dna': human_count,
-        'ratio': ratio
+        'ratio': round(ratio, 2)
     }
     return JsonResponse(stat)
 
-def validateDna(dna):
+def goodDna(dna):
     values = []
     for chain in dna:
         exp = re.findall('[BDEFHIJKLMNOPQRSUVXYZ0-9]', chain)
         if exp:
-            values.append(exp)
-    if values is None:
-        return True
-    else:
-        return False
+            raise TypeError('Valores incorrectos en cadena de ADN')
 
 def searchHorizontal(dna, i, j):
     matches = 0
